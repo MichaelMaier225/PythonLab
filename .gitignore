@@ -1,0 +1,11 @@
+.env
+*.env
+.DS_Store
+**/.DS_Store
+notes.md
+"Projects/ISDS AI/OPENAI_API_KEY.ipynb" 
+"Projects/ISDS AI/.ipynb_checkpoints/" 
+"Projects/ISDS AI/" 
+".env" 
+"Projects/ISDS AI/" 
+".env" 
