@@ -31,7 +31,21 @@ Primary command (sync + dashboard):
 python run_qos_analytics.py
 ```
 
-Optional modes:
+Local-first command (recommended when JSON already exists and you do NOT want API calls):
+
+```bash
+python run_local_analytics.py
+```
+
+Optional local modes:
+
+```bash
+python run_local_analytics.py --checks-only
+python run_local_analytics.py --build-only
+python run_local_analytics.py --dashboard-only
+```
+
+Legacy sync modes:
 
 ```bash
 python run_qos_analytics.py --sync-only
@@ -54,3 +68,14 @@ Synced JSON files are stored in `data/`:
 - `orders_full.json`
 - `products_full.json`
 - `customers_full.json`
+
+## What to do next
+If you already have `orders`, `products`, and `customers` JSON in `data/`, run the local analytics pipeline first:
+
+```bash
+python run_local_analytics.py
+```
+
+This command performs **quality checks**, builds **analytics marts**, and launches the professional dashboard without calling Shopify APIs.
+
+For medium-term planning, follow [`ROADMAP.md`](ROADMAP.md).
