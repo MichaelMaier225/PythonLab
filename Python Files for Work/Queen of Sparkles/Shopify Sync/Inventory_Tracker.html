@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QOS Inventory Scanner</title>
+</head>
+<body>
+  <h1>Scan Product</h1>
+  <input id="barcode" type="text" autofocus placeholder="Scan barcode here" />
+  <div id="status"></div>
+
+  <script>
+    const supabaseUrl = 'https://ccjonuzbvenzjlogpddk.supabase.co';
+    const supabaseKey = 'YOUR_ANON_KEY_HERE';
+    const headers = {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json'
+    };
+
+    document.getElementById('barcode').addEventListener('change', async (e) => {
+      const barcode = e.target.value.trim();
+      e.target.value = ''; // clear input for next scan
+
+      const res = await fetch(`${supabaseUrl}/rest/v1/Inventory?product_id=eq.${barcode}`, {
+        headers
+      });
+      const data = await res.json();
+
+      if (data.length === 0) {
+        // Not found, insert new record
+        await fetch(`${supabaseUrl}/rest/v1/Inventory`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ product_id: barcode })
+        });
+        document.getElementById('status').textContent = `✅ Added new product: ${barcode}`;
+      } else {
+        document.getElementById('status').textContent = `✔️ Product exists: ${barcode}`;
+      }
+    });
+  </script>
+</body>
+</html>
