@@ -32,12 +32,6 @@ def main() -> None:
         description="Local analytics workflow using existing JSON exports (no Shopify sync)."
     )
     parser.add_argument("--data-dir", default="data", help="Directory with orders/products/customers JSON")
-    parser.add_argument("--max-stale-days", type=int, default=3, help="Data freshness threshold in days")
-    parser.add_argument(
-        "--strict-quality",
-        action="store_true",
-        help="Fail the workflow on stale order data. By default, stale data is a warning for local runs.",
-    )
     parser.add_argument("--checks-only", action="store_true", help="Only run data quality checks")
     parser.add_argument(
         "--no-checks",
@@ -60,20 +54,12 @@ def main() -> None:
     data_dir = BASE_DIR / args.data_dir
 
     if not args.no_checks and not args.dashboard_only and not args.build_only:
-        results, all_passed = run_quality_checks(data_dir, max_stale_days=args.max_stale_days)
+        results, all_passed = run_quality_checks(data_dir, check_freshness=False)
         for result in results:
             icon = "PASS" if result.passed else "FAIL"
             print(f"[{icon}] {result.name}: {result.details}")
         if not all_passed:
-            failed_checks = {result.name for result in results if not result.passed}
-            freshness_only_failure = failed_checks == {"orders_data_freshness"}
-            if freshness_only_failure and not args.strict_quality:
-                print(
-                    "[WARN] Continuing with stale data in local mode. "
-                    "Use --strict-quality to block startup when data is old."
-                )
-            else:
-                raise SystemExit("Data quality checks failed.")
+            raise SystemExit("Data quality checks failed.")
 
     if args.checks_only:
         return
