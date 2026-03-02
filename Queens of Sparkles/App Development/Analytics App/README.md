@@ -45,11 +45,7 @@ python run_local_analytics.py --no-checks
 
 When the dashboard starts, open: `http://localhost:8501`
 
-If your exported data is older than the freshness threshold, local runs now continue with a warning so you can still inspect the dashboard. To enforce strict freshness, run:
-
-```bash
-python run_local_analytics.py --strict-quality
-```
+`run_local_analytics.py` now treats freshness as informational for local/offline use, so stale exports will not block startup when you run the default command.
 
 Optional local modes:
 
