@@ -41,6 +41,7 @@ If your data is already downloaded and you just want to build + view locally wit
 
 ```bash
 python run_local_analytics.py --no-checks
+python run_local_analytics.py --skip-freshness-check
 ```
 
 When the dashboard starts, open: `http://localhost:8501`
@@ -51,6 +52,13 @@ If your exported data is older than the freshness threshold, local runs now cont
 python run_local_analytics.py --strict-quality
 ```
 
+
+If you want quality checks but do **not** want freshness to fail for intentionally static local data, run:
+
+```bash
+python run_local_analytics.py --skip-freshness-check
+```
+
 Optional local modes:
 
 ```bash
@@ -58,6 +66,7 @@ python run_local_analytics.py --checks-only
 python run_local_analytics.py --build-only
 python run_local_analytics.py --dashboard-only
 python run_local_analytics.py --no-checks
+python run_local_analytics.py --skip-freshness-check
 ```
 
 Legacy sync modes:

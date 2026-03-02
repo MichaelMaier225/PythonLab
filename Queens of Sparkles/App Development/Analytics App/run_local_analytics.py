@@ -34,6 +34,11 @@ def main() -> None:
     parser.add_argument("--data-dir", default="data", help="Directory with orders/products/customers JSON")
     parser.add_argument("--max-stale-days", type=int, default=3, help="Data freshness threshold in days")
     parser.add_argument(
+        "--skip-freshness-check",
+        action="store_true",
+        help="Skip freshness validation when local data is intentionally static.",
+    )
+    parser.add_argument(
         "--strict-quality",
         action="store_true",
         help="Fail the workflow on stale order data. By default, stale data is a warning for local runs.",
@@ -60,7 +65,11 @@ def main() -> None:
     data_dir = BASE_DIR / args.data_dir
 
     if not args.no_checks and not args.dashboard_only and not args.build_only:
-        results, all_passed = run_quality_checks(data_dir, max_stale_days=args.max_stale_days)
+        results, all_passed = run_quality_checks(
+            data_dir,
+            max_stale_days=args.max_stale_days,
+            check_freshness=not args.skip_freshness_check,
+        )
         for result in results:
             icon = "PASS" if result.passed else "FAIL"
             print(f"[{icon}] {result.name}: {result.details}")

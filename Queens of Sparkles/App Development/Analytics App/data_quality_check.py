@@ -28,7 +28,11 @@ def _parse_datetime(value: str | None) -> datetime | None:
         return None
 
 
-def run_quality_checks(data_dir: Path, max_stale_days: int = 3) -> tuple[list[CheckResult], bool]:
+def run_quality_checks(
+    data_dir: Path,
+    max_stale_days: int = 3,
+    check_freshness: bool = True,
+) -> tuple[list[CheckResult], bool]:
     files = {
         "orders": data_dir / "orders_full.json",
         "products": data_dir / "products_full.json",
@@ -77,21 +81,30 @@ def run_quality_checks(data_dir: Path, max_stale_days: int = 3) -> tuple[list[Ch
         )
     )
 
-    created_dates = [_parse_datetime(order.get("created_at")) for order in loaded["orders"]]
-    created_dates = [date for date in created_dates if date]
-    if created_dates:
-        max_created_at = max(created_dates)
-        stale_threshold = datetime.now(timezone.utc) - timedelta(days=max_stale_days)
-        is_fresh = max_created_at >= stale_threshold
+    if check_freshness:
+        created_dates = [_parse_datetime(order.get("created_at")) for order in loaded["orders"]]
+        created_dates = [date for date in created_dates if date]
+        if created_dates:
+            max_created_at = max(created_dates)
+            stale_threshold = datetime.now(timezone.utc) - timedelta(days=max_stale_days)
+            is_fresh = max_created_at >= stale_threshold
+            results.append(
+                CheckResult(
+                    "orders_data_freshness",
+                    is_fresh,
+                    f"latest_order={max_created_at.isoformat()} threshold={stale_threshold.isoformat()}",
+                )
+            )
+        else:
+            results.append(CheckResult("orders_data_freshness", False, "No parseable order created_at timestamps"))
+    else:
         results.append(
             CheckResult(
                 "orders_data_freshness",
-                is_fresh,
-                f"latest_order={max_created_at.isoformat()} threshold={stale_threshold.isoformat()}",
+                True,
+                "Freshness check skipped (--skip-freshness-check)",
             )
         )
-    else:
-        results.append(CheckResult("orders_data_freshness", False, "No parseable order created_at timestamps"))
 
     all_passed = all(result.passed for result in results)
     return results, all_passed
@@ -101,9 +114,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Data quality gate for local Shopify analytics JSON.")
     parser.add_argument("--data-dir", default="data", help="Directory containing Shopify JSON exports")
     parser.add_argument("--max-stale-days", type=int, default=3, help="Allowed staleness window for latest order")
+    parser.add_argument(
+        "--skip-freshness-check",
+        action="store_true",
+        help="Skip order freshness validation when using intentionally static local datasets.",
+    )
     args = parser.parse_args()
 
-    results, all_passed = run_quality_checks(Path(args.data_dir), max_stale_days=args.max_stale_days)
+    results, all_passed = run_quality_checks(
+        Path(args.data_dir),
+        max_stale_days=args.max_stale_days,
+        check_freshness=not args.skip_freshness_check,
+    )
 
     print("\n=== DATA QUALITY REPORT ===")
     for result in results:
