@@ -54,7 +54,7 @@ def build_marts(data_dir: Path) -> dict[str, int]:
 
     fact_order_lines = pd.DataFrame(order_lines_rows)
     if not fact_order_lines.empty:
-        fact_order_lines["created_at"] = pd.to_datetime(fact_order_lines["created_at"], errors="coerce")
+        fact_order_lines["created_at"] = pd.to_datetime(fact_order_lines["created_at"], errors="coerce", utc=True)
 
     products_rows: list[dict[str, Any]] = []
     for product in products:
@@ -92,7 +92,7 @@ def build_marts(data_dir: Path) -> dict[str, int]:
 
     dim_customers = pd.DataFrame(customer_rows)
     if not dim_customers.empty:
-        dim_customers["created_at"] = pd.to_datetime(dim_customers["created_at"], errors="coerce")
+        dim_customers["created_at"] = pd.to_datetime(dim_customers["created_at"], errors="coerce", utc=True)
 
     if not fact_order_lines.empty:
         daily_sales = (
