@@ -37,12 +37,27 @@ Local-first command (recommended when JSON already exists and you do NOT want AP
 python run_local_analytics.py
 ```
 
+If your data is already downloaded and you just want to build + view locally without quality gating:
+
+```bash
+python run_local_analytics.py --no-checks
+```
+
+When the dashboard starts, open: `http://localhost:8501`
+
+If your exported data is older than the freshness threshold, local runs now continue with a warning so you can still inspect the dashboard. To enforce strict freshness, run:
+
+```bash
+python run_local_analytics.py --strict-quality
+```
+
 Optional local modes:
 
 ```bash
 python run_local_analytics.py --checks-only
 python run_local_analytics.py --build-only
 python run_local_analytics.py --dashboard-only
+python run_local_analytics.py --no-checks
 ```
 
 Legacy sync modes:
