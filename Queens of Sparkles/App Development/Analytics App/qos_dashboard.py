@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -51,12 +51,17 @@ max_date = fact_order_lines["created_at"].max().date()
 
 st.sidebar.header("Filters")
 default_start = max(max_date - timedelta(days=30), min_date)
-start_date, end_date = st.sidebar.date_input(
+selected_date_range = st.sidebar.date_input(
     "Date range",
     value=(default_start, max_date),
     min_value=min_date,
     max_value=max_date,
 )
+
+if isinstance(selected_date_range, tuple):
+    start_date, end_date = selected_date_range
+else:
+    start_date = end_date = selected_date_range
 
 vendor_options = sorted([v for v in dim_products["vendor"].dropna().unique().tolist() if v])
 selected_vendors = st.sidebar.multiselect("Vendors", options=vendor_options, default=vendor_options)
@@ -114,7 +119,7 @@ with tab_exec:
     )
     st.plotly_chart(
         px.line(daily, x="order_date", y="line_revenue", markers=True, title="Revenue Trend"),
-        use_container_width=True,
+        width="stretch",
     )
 
     left, right = st.columns(2)
@@ -126,7 +131,7 @@ with tab_exec:
                 values="order_id",
                 title="Order Financial Status Mix",
             ),
-            use_container_width=True,
+            width="stretch",
         )
     with right:
         weekday = filtered.assign(weekday=filtered["created_at"].dt.day_name())
@@ -136,7 +141,7 @@ with tab_exec:
         weekday_agg = weekday_agg.sort_values("weekday")
         st.plotly_chart(
             px.bar(weekday_agg, x="weekday", y="line_revenue", title="Revenue by Day of Week"),
-            use_container_width=True,
+            width="stretch",
         )
 
 with tab_products:
@@ -152,7 +157,7 @@ with tab_products:
     )
     st.plotly_chart(
         px.bar(top_products, x="revenue", y="product_name", orientation="h", title="Top 20 Products by Revenue"),
-        use_container_width=True,
+        width="stretch",
     )
 
     vendor_perf = (
@@ -160,10 +165,10 @@ with tab_products:
         .agg(revenue=("line_revenue", "sum"), units=("quantity", "sum"), orders=("order_id", "nunique"))
         .sort_values("revenue", ascending=False)
     )
-    st.dataframe(vendor_perf, use_container_width=True)
+    st.dataframe(vendor_perf, width="stretch")
 
 with tab_inventory:
-    recent_cutoff = pd.Timestamp(datetime.now() - timedelta(days=30))
+    recent_cutoff = pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=30)
     recent = fact_order_lines[fact_order_lines["created_at"] >= recent_cutoff]
 
     velocity = (
@@ -200,7 +205,7 @@ with tab_inventory:
                 "risk_score",
             ]
         ],
-        use_container_width=True,
+        width="stretch",
     )
 
     st.plotly_chart(
@@ -211,7 +216,7 @@ with tab_inventory:
             hover_data=["sku", "product_title", "variant_title"],
             title="Inventory Positioning: 30-Day Velocity vs On-Hand Stock",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 with tab_customers:
@@ -237,14 +242,14 @@ with tab_customers:
                 orientation="h",
                 title="Top 20 Customers by Revenue",
             ),
-            use_container_width=True,
+            width="stretch",
         )
     with right:
         seg = customer_perf.groupby("segment", as_index=False)["customer_email"].count()
         seg.rename(columns={"customer_email": "customers"}, inplace=True)
         st.plotly_chart(
             px.pie(seg, names="segment", values="customers", title="Customer Mix by Frequency Segment"),
-            use_container_width=True,
+            width="stretch",
         )
 
-    st.dataframe(customer_perf.head(50), use_container_width=True)
+    st.dataframe(customer_perf.head(50), width="stretch")
