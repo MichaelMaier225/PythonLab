@@ -5,7 +5,7 @@ capitals = {'USA':'Washington DC',
 
 capitals.update({'Germany':'Berlin'})
 #capitals.update({'USA':'Las Vegas'})
-capitals.pop('China')
+#capitals.pop('China')
 #capitals.clear()
 
 #print(capitals['Russia'])
@@ -14,5 +14,6 @@ capitals.pop('China')
 #print(capitals.values())
 #print(capitals.items())
 
-for key,value in capitals.items():
-    print(key,value)
+for k,v in capitals.items():
+    if k != 'USA':  
+        print(k, v)

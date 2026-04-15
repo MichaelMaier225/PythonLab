@@ -1,9 +1,9 @@
 #while 1==1:
     #print("Help! I'm stuck in a loop!")
 
-#name = None
+name = None
 
-#while not name:
-    #name = input("Enter your name: ")
+while not name:
+    name = input("Enter your name: ")
 
-#print("Hello "+name)
+print("Hello "+name)
